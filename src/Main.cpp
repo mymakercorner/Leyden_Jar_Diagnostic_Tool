@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
 
-        diagTool.GuiLoop();
+        diagTool.RunStep();
 
         // Rendering
         ImGui::Render();

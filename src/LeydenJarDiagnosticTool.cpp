@@ -283,7 +283,7 @@ void LeydenJarDiagnosticTool::DecodeVialKeyboardDefinition(const uint8_t* compre
     }
 }
 
-void LeydenJarDiagnosticTool::GuiLoop()
+void LeydenJarDiagnosticTool::RunStep()
 {
     ImGuiIO& io = ImGui::GetIO();
     

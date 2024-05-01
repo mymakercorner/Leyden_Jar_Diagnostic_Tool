@@ -280,12 +280,12 @@ uint32_t LeydenJarAgent::GetLogicalKeyboardState(int row)
 
 void LeydenJarAgent::GetPhysicalKeyboardState(uint8_t* physicalState)
 {
-    memcpy(physicalState, m_PhysicalKeyboardState, m_DeviceInfo.nbPhysicalCols);
+    std::memcpy(physicalState, m_PhysicalKeyboardState, m_DeviceInfo.nbPhysicalCols);
 }
 
 void LeydenJarAgent::GetColLevels(int col, uint16_t* colLevels)
 {
-    memcpy(colLevels, m_Levels[col], 8 * sizeof(uint16_t));
+    std::memcpy(colLevels, m_Levels[col], 8 * sizeof(uint16_t));
 }
 
 bool LeydenJarAgent::IsDeviceOpened()

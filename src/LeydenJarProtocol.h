@@ -7,6 +7,8 @@
 
 #include "hidapi.h" 
 
+// This class handles all raw HID communications with the Leyden Jar controller firmware
+
 class LeydenJarProtocol
 {
 public:

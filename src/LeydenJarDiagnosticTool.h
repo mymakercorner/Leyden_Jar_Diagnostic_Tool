@@ -6,6 +6,10 @@
 #include <vector>
 #include "LeydenJarAgent.h"
 
+// This class handles:
+//   - communication with the daemon in class LeydenJarAgent.
+//   - GUI rendering using ImGui API.  
+
 class LeydenJarDiagnosticTool
 {
 private:
@@ -83,7 +87,7 @@ public:
 	bool Initialize();
 	bool Finalize();
 
-	void GuiLoop();
+	void RunStep();
 
 private:
 
