@@ -1,12 +1,20 @@
-#include "LeydenJarAgent.h"
+// SPDX-FileCopyrightText: 2024 Eric Becourt <rico@mymakercorner.com>
+// SPDX-License-Identifier: MIT
 
+#include <cstring>
+
+#include "LeydenJarAgent.h"
 
 LeydenJarAgent::LeydenJarAgent()
 	: m_ReqType(LeydenJarReqNone)
+    , m_ReqDeviceIndex(-1)
 	, m_AckType(LeydenJarAckNone)
 	, m_Thread(&LeydenJarAgent::ThreadLoop, this)
 {
-
+    std::memset(&m_DeviceInfo, 0, sizeof(m_DeviceInfo));
+    std::memset(&m_LogicKeyboardState, 0, sizeof(m_LogicKeyboardState));
+    std::memset(&m_PhysicalKeyboardState, 0, sizeof(m_PhysicalKeyboardState));
+    std::memset(&m_Levels, 0, sizeof(m_Levels));
 }
 
 LeydenJarAgent::~LeydenJarAgent()
@@ -67,18 +75,18 @@ void LeydenJarAgent::ThreadLoop()
                         if (m_DeviceInfo.matrixToControllerCols[i] == col)
                             m_DeviceInfo.controllerToMatrixCols[col] = i;
                 
-                m_DeviceInfo.vial_version_0 = m_DeviceInfo.vial_version_1 = m_DeviceInfo.vial_version_2 = m_DeviceInfo.vial_version_3 = 0;
-                isSuccess = m_Protocol.GetVialInfos(m_DeviceInfo.vial_version_0, m_DeviceInfo.vial_version_1, m_DeviceInfo.vial_version_2, m_DeviceInfo.vial_version_3, m_DeviceInfo.vial_uid);
+                m_DeviceInfo.vialVersion0 = m_DeviceInfo.vialVersion1 = m_DeviceInfo.vialVersion2 = m_DeviceInfo.vialVersion3 = 0;
+                isSuccess = m_Protocol.GetVialInfos(m_DeviceInfo.vialVersion0, m_DeviceInfo.vialVersion1, m_DeviceInfo.vialVersion2, m_DeviceInfo.vialVersion3, m_DeviceInfo.vialUid);
                 if (isSuccess == false)
                     break;
-                isSuccess = m_Protocol.GetVialKeyboardDefinitionSize(m_DeviceInfo.vial_keyboard_definition_size);
+                isSuccess = m_Protocol.GetVialKeyboardDefinitionSize(m_DeviceInfo.vialKeyboardDefinitionSize);
                 if (isSuccess == false)
                     break;
-                isSuccess = m_Protocol.GetVialKeyboardDefinitionData(m_DeviceInfo.vial_keyboard_definition_size, m_DeviceInfo.vial_keyboard_definition_data);
+                isSuccess = m_Protocol.GetVialKeyboardDefinitionData(m_DeviceInfo.vialKeyboardDefinitionSize, m_DeviceInfo.vialKeyboardDefinitionData);
                 if (isSuccess == false)
                     break;
-                m_DeviceInfo.via_version_major = m_DeviceInfo.via_version_minor = 0;
-                isSuccess = m_Protocol.GetViaProtocolVersion(m_DeviceInfo.via_version_major, m_DeviceInfo.via_version_minor);
+                m_DeviceInfo.viaVersionMajor = m_DeviceInfo.viaVersionMinor = 0;
+                isSuccess = m_Protocol.GetViaProtocolVersion(m_DeviceInfo.viaVersionMajor, m_DeviceInfo.viaVersionMinor);
                 if (isSuccess == false)
                     break;
 

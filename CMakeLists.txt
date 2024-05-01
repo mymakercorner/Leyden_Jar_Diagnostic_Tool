@@ -22,16 +22,20 @@ add_subdirectory(external/jsoncpp)
 add_subdirectory(external/minlzma/minlzlib)
 add_subdirectory(external/SDL)
 
-# Find OpenGL package, used by SDLMain and ImGui for Windows/Linux
+# Find OpenGL package, used by SDLMain and ImGui for Windows/Linux/Mac
 find_package(OpenGL)
 
 # Leyden Jar Diagnostic Tool executable
 add_executable(Leyden_Jar_Diagnostic_Tool
   src/Main.cpp
   src/LeydenJarProtocol.cpp
+  src/LeydenJarProtocol.h
   src/LeydenJarAgent.cpp
+  src/LeydenJarAgent.h
   src/LeydenJarImGuiHelpers.cpp
+  src/LeydenJarImGuiHelpers.h
   src/LeydenJarDiagnosticTool.cpp
+  src/LeydenJarDiagnosticTool.h
   external/imgui/imgui.cpp
   external/imgui/imgui_demo.cpp
   external/imgui/imgui_draw.cpp
@@ -62,5 +66,5 @@ target_link_libraries(Leyden_Jar_Diagnostic_Tool PRIVATE SDL2::SDL2)
 # Link with hidapi, jsoncpp_lib and minlzlib
 target_link_libraries(Leyden_Jar_Diagnostic_Tool PRIVATE hidapi jsoncpp_lib minlzlib)
 
-# Link with OpenGL libraies because used by SDLMain and ImGui for Windows/Linux
+# Link with OpenGL libraies because used by SDLMain and ImGui for Windows/Linux/Mac
 target_link_libraries(Leyden_Jar_Diagnostic_Tool PRIVATE ${OPENGL_LIBRARIES})

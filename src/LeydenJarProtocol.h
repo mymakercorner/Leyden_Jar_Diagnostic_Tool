@@ -1,5 +1,8 @@
 #pragma once
 
+// SPDX-FileCopyrightText: 2024 Eric Becourt <rico@mymakercorner.com>
+// SPDX-License-Identifier: MIT
+
 #include <stdint.h> 
 
 #include "hidapi.h" 
@@ -50,7 +53,6 @@ public:
 	void PrintDeviceList();
 
 private:
-
 	void PrintDevice(struct hid_device_info* curDev, int deviceIndex);
 	void FillLeydenJarSendPacketHeader(uint8_t getOrSet, uint8_t command);
 	void FillViaSendPacketHeader(uint8_t viaCommand, uint8_t command);

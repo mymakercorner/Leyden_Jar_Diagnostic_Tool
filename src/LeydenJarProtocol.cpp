@@ -1,45 +1,50 @@
+// SPDX-FileCopyrightText: 2024 Eric Becourt <rico@mymakercorner.com>
+// SPDX-License-Identifier: MIT
+
 #include <iostream>
-#include <string>
+#include <cstring>
 #include "LeydenJarProtocol.h" 
 
-const uint16_t leyden_jar_protocol_magic = 0x21C0;
+const uint16_t	c_LeydenJarProtocolMagic	= 0x21C0;
+const uint8_t	c_GetProtocolVersionId		= 1;
+const uint8_t	c_GetKeyboardValueId		= 2;
+const uint8_t	c_SetKeyboardValueId		= 3;
+const uint8_t	c_VialPrefixId				= 0xFE;
 
-const uint8_t id_get_protocol_version = 1;
-const uint8_t id_get_keyboard_value = 2;
-const uint8_t id_set_keyboard_value = 3;
-const uint8_t id_vial_prefix = 0xFE;
-
-enum leyden_jar_keyboard_value_id {
-	id_leyden_jar_offset = 0x80, //Sufficiently high value to be safe to use
-	id_leyden_jar_protocol_version,
-	id_leyden_jar_details,
-	id_leyden_jar_enable_keyboard,
-	id_leyden_jar_detect_levels,
-	id_leyden_jar_dac_threshold,
-	id_leyden_jar_col_levels,
-	id_leyden_jar_scan_logical_matrix,
-	id_leyden_jar_scan_physical_matrix,
-	id_leyden_jar_enter_bootloader,
-	id_leyden_jar_reboot,
-	id_leyden_jar_erase_eeprom,
-	id_leyden_jar_logical_matrix_row,
-	id_leyden_jar_physical_matrix_vals,
-	id_leyden_jar_matrix_mapping,
-	id_leyden_jar_dac_ref_level,
-	id_leyden_jar_bin_map
+enum LeydenJarCommandId {
+	LeydenJarCommandIdOffset = 0x80, //Sufficiently high value to be safe to use
+	LeydenJarCommandIdProtocolVersion,
+	LeydenJarCommandIdDetails,
+	LeydenJarCommandIdEnableKeyboard,
+	LeydenJarCommandIdDetectLevels,
+	LeydenJarCommandIdDacThreshold,
+	LeydenJarCommandIdColLevels,
+	LeydenJarCommandIdScanLogicalMatrix,
+	LeydenJarCommandIdScanPhysicalMatrix,
+	LeydenJarCommandIdEnterBootloader,
+	LeydenJarCommandIdReboot,
+	LeydenJarCommandIdEraseEeprom,
+	LeydenJarCommandIdLogicalMatrixRow,
+	LeydenJarCommandIdPhysicalMatrixVals,
+	LeydenJarCommandIdMatrixMapping,
+	LeydenJarCommandIdDacRefLevel,
+	LeydenJarCommandIdBinMap
 };
 
-enum vial_keyboard_value_id {
-	vial_get_keyboard_id = 0,
-	vial_get_size,
-	vial_get_def
+enum VialKeyboardValueId {
+	VialGetKeyboardId = 0,
+	VialGetSize,
+	VialGetDef
 };
 
 LeydenJarProtocol::LeydenJarProtocol()
 	: m_pEnumeratedDeviceInfo(nullptr)
 	, m_pHidDevice(nullptr)
+	, m_pSendPayloadPtr(nullptr)
+	, m_pRcvPayloadPtr(nullptr)
 {
-
+	std::memset(m_RawHidSendPacket, 0, sizeof(m_RawHidSendPacket));
+	std::memset(m_RawHidRcvPacket, 0, sizeof(m_RawHidRcvPacket));
 }
 
 bool LeydenJarProtocol::Initialize()
@@ -208,7 +213,7 @@ void LeydenJarProtocol::FillLeydenJarSendPacketHeader(uint8_t getOrSet, uint8_t 
 	m_RawHidSendPacket[1] = getOrSet;
 	m_RawHidSendPacket[2] = command;
 	uint16_t* magic_ptr = (uint16_t*)(m_RawHidSendPacket + 3);
-	*magic_ptr = leyden_jar_protocol_magic;
+	*magic_ptr = c_LeydenJarProtocolMagic;
 
 	m_pSendPayloadPtr = m_RawHidSendPacket + 5;
 	m_pRcvPayloadPtr = m_RawHidRcvPacket + 4;
@@ -254,7 +259,7 @@ bool LeydenJarProtocol::HidSendCommand(bool hidReceive, bool checkReturn)
 
 bool LeydenJarProtocol::GetDacThreshold(uint16_t& dacThreshold, int binNumber)
 {
-	FillLeydenJarSendPacketHeader(id_get_keyboard_value, id_leyden_jar_dac_threshold);
+	FillLeydenJarSendPacketHeader(c_GetKeyboardValueId, LeydenJarCommandIdDacThreshold);
 	*(uint16_t*)m_pSendPayloadPtr = (uint16_t)binNumber;
 	
 	if (HidSendCommand() == false)
@@ -267,7 +272,7 @@ bool LeydenJarProtocol::GetDacThreshold(uint16_t& dacThreshold, int binNumber)
 
 bool LeydenJarProtocol::GetDacRefLevel(uint16_t& dacRefLevel, int binNumber)
 {
-	FillLeydenJarSendPacketHeader(id_get_keyboard_value, id_leyden_jar_dac_ref_level);
+	FillLeydenJarSendPacketHeader(c_GetKeyboardValueId, LeydenJarCommandIdDacRefLevel);
 	*(uint16_t*)m_pSendPayloadPtr = (uint16_t)binNumber;
 
 	if (HidSendCommand() == false)
@@ -280,7 +285,7 @@ bool LeydenJarProtocol::GetDacRefLevel(uint16_t& dacRefLevel, int binNumber)
 
 bool LeydenJarProtocol::SetDac(int dacThreshold)
 {
-	FillLeydenJarSendPacketHeader(id_set_keyboard_value, id_leyden_jar_dac_threshold);
+	FillLeydenJarSendPacketHeader(c_SetKeyboardValueId, LeydenJarCommandIdDacThreshold);
 
 	*(uint16_t*)m_pSendPayloadPtr = (uint16_t)dacThreshold;
 
@@ -292,7 +297,7 @@ bool LeydenJarProtocol::SetDac(int dacThreshold)
 
 bool LeydenJarProtocol::GetColumnBinMap(int columnIndex, uint8_t* binMap)
 {
-	FillLeydenJarSendPacketHeader(id_get_keyboard_value, id_leyden_jar_bin_map);
+	FillLeydenJarSendPacketHeader(c_GetKeyboardValueId, LeydenJarCommandIdBinMap);
 
 	*(uint16_t*)m_pSendPayloadPtr = (uint16_t)columnIndex;
 
@@ -308,7 +313,7 @@ bool LeydenJarProtocol::GetColumnBinMap(int columnIndex, uint8_t* binMap)
 
 bool LeydenJarProtocol::GetColumnLevels(int columnIndex, uint16_t* columnLevels)
 {
-	FillLeydenJarSendPacketHeader(id_get_keyboard_value, id_leyden_jar_col_levels);
+	FillLeydenJarSendPacketHeader(c_GetKeyboardValueId, LeydenJarCommandIdColLevels);
 
 	*(uint16_t*)m_pSendPayloadPtr = (uint16_t)columnIndex;
 
@@ -324,7 +329,7 @@ bool LeydenJarProtocol::GetColumnLevels(int columnIndex, uint16_t* columnLevels)
 
 bool LeydenJarProtocol::SetKeyboardStatus(bool enable)
 {
-	FillLeydenJarSendPacketHeader(id_set_keyboard_value, id_leyden_jar_enable_keyboard);
+	FillLeydenJarSendPacketHeader(c_SetKeyboardValueId, LeydenJarCommandIdEnableKeyboard);
 
 	*m_pSendPayloadPtr = (enable == true) ? 1 : 0;
 
@@ -336,7 +341,7 @@ bool LeydenJarProtocol::SetKeyboardStatus(bool enable)
 
 bool LeydenJarProtocol::GetKeyboardStatus(bool& enable)
 {
-	FillLeydenJarSendPacketHeader(id_get_keyboard_value, id_leyden_jar_enable_keyboard);
+	FillLeydenJarSendPacketHeader(c_GetKeyboardValueId, LeydenJarCommandIdEnableKeyboard);
 
 	if (HidSendCommand() == false)
 		return false;
@@ -358,37 +363,37 @@ bool LeydenJarProtocol::GenericCommandNoPayload(uint8_t getOrSet, uint8_t comman
 
 bool LeydenJarProtocol::Reboot()
 {
-	return GenericCommandNoPayload(id_set_keyboard_value, id_leyden_jar_reboot, false);
+	return GenericCommandNoPayload(c_SetKeyboardValueId, LeydenJarCommandIdReboot, false);
 }
 
 bool LeydenJarProtocol::EnterBootLoader()
 {
-	return GenericCommandNoPayload(id_set_keyboard_value, id_leyden_jar_enter_bootloader, false);
+	return GenericCommandNoPayload(c_SetKeyboardValueId, LeydenJarCommandIdEnterBootloader, false);
 }
 
 bool LeydenJarProtocol::EraseEeprom()
 {
-	return GenericCommandNoPayload(id_set_keyboard_value, id_leyden_jar_erase_eeprom, false);
+	return GenericCommandNoPayload(c_SetKeyboardValueId, LeydenJarCommandIdEraseEeprom, false);
 }
 
 bool LeydenJarProtocol::DetectLevels()
 {
-	return GenericCommandNoPayload(id_set_keyboard_value, id_leyden_jar_detect_levels);
+	return GenericCommandNoPayload(c_SetKeyboardValueId, LeydenJarCommandIdDetectLevels);
 }
 
 bool LeydenJarProtocol::ScanLogicalMatrix()
 {
-	return GenericCommandNoPayload(id_set_keyboard_value, id_leyden_jar_scan_logical_matrix);
+	return GenericCommandNoPayload(c_SetKeyboardValueId, LeydenJarCommandIdScanLogicalMatrix);
 }
 
 bool LeydenJarProtocol::ScanPhysicalMatrix()
 {
-	return GenericCommandNoPayload(id_set_keyboard_value, id_leyden_jar_scan_physical_matrix);
+	return GenericCommandNoPayload(c_SetKeyboardValueId, LeydenJarCommandIdScanPhysicalMatrix);
 }
 
 bool LeydenJarProtocol::GetScanLogicalRow(int rowIndex, uint32_t& rowVal)
 {
-	FillLeydenJarSendPacketHeader(id_get_keyboard_value, id_leyden_jar_logical_matrix_row);
+	FillLeydenJarSendPacketHeader(c_GetKeyboardValueId, LeydenJarCommandIdLogicalMatrixRow);
 
 	*(uint16_t*)m_pSendPayloadPtr = (uint16_t)rowIndex;
 
@@ -402,7 +407,7 @@ bool LeydenJarProtocol::GetScanLogicalRow(int rowIndex, uint32_t& rowVal)
 
 bool LeydenJarProtocol::GetScanPhysicalVals(uint8_t* rawVals)
 {
-	FillLeydenJarSendPacketHeader(id_get_keyboard_value, id_leyden_jar_physical_matrix_vals);
+	FillLeydenJarSendPacketHeader(c_GetKeyboardValueId, LeydenJarCommandIdPhysicalMatrixVals);
 
 	if (HidSendCommand() == false)
 		return false;
@@ -414,7 +419,7 @@ bool LeydenJarProtocol::GetScanPhysicalVals(uint8_t* rawVals)
 
 bool LeydenJarProtocol::GetProtocolVersion(uint8_t& major, uint8_t& mid, uint16_t& minor)
 {
-	FillLeydenJarSendPacketHeader(id_get_keyboard_value, id_leyden_jar_protocol_version);
+	FillLeydenJarSendPacketHeader(c_GetKeyboardValueId, LeydenJarCommandIdProtocolVersion);
 
 	if (HidSendCommand() == false)
 		return false;
@@ -428,7 +433,7 @@ bool LeydenJarProtocol::GetProtocolVersion(uint8_t& major, uint8_t& mid, uint16_
 
 bool LeydenJarProtocol::GetDetails(uint8_t& nbLogicalRows, uint8_t& nbLogicalCols, uint8_t& nbPhysicalRows, uint8_t& nbPhysicalCols, uint8_t& switchTechnology, uint8_t& nbBins)
 {
-	FillLeydenJarSendPacketHeader(id_get_keyboard_value, id_leyden_jar_details);
+	FillLeydenJarSendPacketHeader(c_GetKeyboardValueId, LeydenJarCommandIdDetails);
 
 	if (HidSendCommand() == false)
 		return false;
@@ -445,7 +450,7 @@ bool LeydenJarProtocol::GetDetails(uint8_t& nbLogicalRows, uint8_t& nbLogicalCol
 
 bool LeydenJarProtocol::GetMatrixMapping(uint8_t& matrixToControllerType, uint8_t* matrixToControllerRows, uint8_t* matrixToControllerCols, uint8_t nbPhysicalRows, uint8_t nbPhysicalCols)
 {
-	FillLeydenJarSendPacketHeader(id_get_keyboard_value, id_leyden_jar_matrix_mapping);
+	FillLeydenJarSendPacketHeader(c_GetKeyboardValueId, LeydenJarCommandIdMatrixMapping);
 
 	if (HidSendCommand() == false)
 		return false;
@@ -459,7 +464,7 @@ bool LeydenJarProtocol::GetMatrixMapping(uint8_t& matrixToControllerType, uint8_
 
 bool LeydenJarProtocol::GetViaProtocolVersion(uint8_t& major, uint8_t& minor)
 {
-	FillViaSendPacketHeader(id_get_protocol_version, 0);
+	FillViaSendPacketHeader(c_GetProtocolVersionId, 0);
 
 	if (HidSendCommand() == false)
 		return false;
@@ -472,7 +477,7 @@ bool LeydenJarProtocol::GetViaProtocolVersion(uint8_t& major, uint8_t& minor)
 
 bool LeydenJarProtocol::GetVialInfos(uint8_t& version0, uint8_t& version1, uint8_t& version2, uint8_t& version3, uint8_t* pUid)
 {
-	FillViaSendPacketHeader(id_vial_prefix, vial_get_keyboard_id);
+	FillViaSendPacketHeader(c_VialPrefixId, VialGetKeyboardId);
 
 	if (HidSendCommand() == false)
 		return false;
@@ -488,7 +493,7 @@ bool LeydenJarProtocol::GetVialInfos(uint8_t& version0, uint8_t& version1, uint8
 
 bool LeydenJarProtocol::GetVialKeyboardDefinitionSize(uint32_t& definitionSize)
 {
-	FillViaSendPacketHeader(id_vial_prefix, vial_get_size);
+	FillViaSendPacketHeader(c_VialPrefixId, VialGetSize);
 
 	if (HidSendCommand() == false)
 		return false;
@@ -500,7 +505,7 @@ bool LeydenJarProtocol::GetVialKeyboardDefinitionSize(uint32_t& definitionSize)
 
 bool LeydenJarProtocol::GetVialKeyboardDefinitionDataBlock(uint16_t blockNumber, uint8_t* pBlockData)
 {
-	FillViaSendPacketHeader(id_vial_prefix, vial_get_def);
+	FillViaSendPacketHeader(c_VialPrefixId, VialGetDef);
 	*(uint16_t*)m_pSendPayloadPtr = blockNumber;
 
 	if (HidSendCommand(true, false) == false)

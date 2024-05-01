@@ -1,8 +1,10 @@
 #pragma once
 
+// SPDX-FileCopyrightText: 2024 Eric Becourt <rico@mymakercorner.com>
+// SPDX-License-Identifier: MIT
+
 #include <vector>
 #include "LeydenJarAgent.h"
-
 
 class LeydenJarDiagnosticTool
 {

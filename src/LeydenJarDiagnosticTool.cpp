@@ -1,5 +1,8 @@
+// SPDX-FileCopyrightText: 2024 Eric Becourt <rico@mymakercorner.com>
+// SPDX-License-Identifier: MIT
+
 #include <cstdlib>
-#include <string>
+#include <cstring>
 #include <limits>
 #include <array>
 #include <algorithm>
@@ -17,9 +20,8 @@ extern "C"
 }
 
 // You can put this variable to true to display ImGui demo window.
-// If you plan to tweak the GUI yourself this is a very good place to start
-// learning InGui functionalities.
-bool show_demo_window = false;
+// If you plan to tweak the GUI yourself this is a very good place to start learning ImGui API.
+bool showDemoWindow = false;
 
 bool LeydenJarDiagnosticTool::Initialize()
 {
@@ -257,7 +259,7 @@ void LeydenJarDiagnosticTool::DecodeVialKeyboardDefinition(const uint8_t* compre
         }
     }
 
-    //Find minimal x and Y positions for the layouts
+    //Find minimal X and Y positions for the layouts
     float minX = FLT_MAX;
     float minY = FLT_MAX;
 
@@ -285,11 +287,6 @@ void LeydenJarDiagnosticTool::GuiLoop()
 {
     ImGuiIO& io = ImGui::GetIO();
     
-    static float f = 0.0f;
-    static int counter = 0;
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
-
     ImVec2 displaySize = ImGui::GetIO().DisplaySize;
     ImGui::SetNextWindowPos(ImVec2(0,0), ImGuiCond_Always);
     ImGui::SetNextWindowSize(displaySize, ImGuiCond_Always);
@@ -317,8 +314,8 @@ void LeydenJarDiagnosticTool::GuiLoop()
 
     ImGui::End();
 
-    if (show_demo_window)
-        ImGui::ShowDemoWindow(&show_demo_window);
+    if (showDemoWindow)
+        ImGui::ShowDemoWindow(&showDemoWindow);
 }
 
 void LeydenJarDiagnosticTool::LeftPaneRendering()
@@ -381,25 +378,25 @@ void LeydenJarDiagnosticTool::LeftPaneDrawViaLayoutOptions()
 
 void LeydenJarDiagnosticTool::LeftPaneDrawLeydenJarInfos()
 {
-    const LeydenJarAgent::LeydenJarDeviceInfo* deviceInfo = m_Agent.GetDeviceInfo();
+    const LeydenJarAgent::LeydenJarDeviceInfo* pDeviceInfo = m_Agent.GetDeviceInfo();
 
     ImGui::SeparatorText("Leyden Jar Infos");
 
-    ImGui::Text("Protocol Version: %d.%d.%d", deviceInfo->protocolVerMajor, deviceInfo->protocolVerMid, deviceInfo->protocolVerMinor);
+    ImGui::Text("Protocol Version: %d.%d.%d", pDeviceInfo->protocolVerMajor, pDeviceInfo->protocolVerMid, pDeviceInfo->protocolVerMinor);
 
     const char* matrixLayoutName[3] = { "Native Leyden Jar", "XWhatsit", "Wcass" };
     const char* switchTechnologyName[3] = { "Model F", "BeamSpring" };
-    ImGui::Text("Matrix Layout: %s", matrixLayoutName[deviceInfo->matrixToControllerType]);
-    ImGui::Text("Number of QMK Cols: %d", deviceInfo->nbLogicalCols);
-    ImGui::Text("Number of QMK Rows: %d", deviceInfo->nbLogicalRows);
-    ImGui::Text("Number of Controller Cols: %d", deviceInfo->nbPhysicalCols);
-    ImGui::Text("Number of Controller Rows: %d", deviceInfo->nbPhysicalRows);
-    ImGui::Text("Switch Technology: %s", switchTechnologyName[deviceInfo->switchTechnology]);
-    ImGui::Text("We have %d DAC bins:", deviceInfo->nbBins);
-    for (int i = 0; i < deviceInfo->nbBins; i++)
+    ImGui::Text("Matrix Layout: %s", matrixLayoutName[pDeviceInfo->matrixToControllerType]);
+    ImGui::Text("Number of QMK Cols: %d", pDeviceInfo->nbLogicalCols);
+    ImGui::Text("Number of QMK Rows: %d", pDeviceInfo->nbLogicalRows);
+    ImGui::Text("Number of Controller Cols: %d", pDeviceInfo->nbPhysicalCols);
+    ImGui::Text("Number of Controller Rows: %d", pDeviceInfo->nbPhysicalRows);
+    ImGui::Text("Switch Technology: %s", switchTechnologyName[pDeviceInfo->switchTechnology]);
+    ImGui::Text("We have %d DAC bins:", pDeviceInfo->nbBins);
+    for (int i = 0; i < pDeviceInfo->nbBins; i++)
     {
-        ImGui::Text("  - DAC Threshold %d: %d", i, deviceInfo->dacThreshold[i]);
-        ImGui::Text("  - DAC Ref Level %d: %d", i, deviceInfo->dacRefLevel[i]);
+        ImGui::Text("  - DAC Threshold %d: %d", i, pDeviceInfo->dacThreshold[i]);
+        ImGui::Text("  - DAC Ref Level %d: %d", i, pDeviceInfo->dacRefLevel[i]);
     }
 }
 
@@ -437,16 +434,16 @@ void LeydenJarDiagnosticTool::LeftPaneRenderingDeviceDescription()
                 m_VialUncompressedKeyboardDefinitionSize = 0;
                 m_LayoutOptions.clear();
                 m_Keys.clear();
-                memset(m_LogicKeyboardState, 0, sizeof(m_LogicKeyboardState));
-                memset(m_PhysicalKeyboardState, 0, sizeof(m_PhysicalKeyboardState));
+                std::memset(m_LogicKeyboardState, 0, sizeof(m_LogicKeyboardState));
+                std::memset(m_PhysicalKeyboardState, 0, sizeof(m_PhysicalKeyboardState));
                 m_LogicalKeyboardStateRequestSent = false;
                 m_PhysicalKeyboardStateRequestSent = false;
                 m_KeyboardLevelsRequestSent = false;
                 m_KeyboardLevelsAcquired = false;
                 m_CurLevelIdx = -1;
-                memset(m_CurLevels, 0, sizeof(m_CurLevels));
-                memset(m_MinLevels, 0xFF, sizeof(m_MinLevels));
-                memset(m_MaxLevels, 0, sizeof(m_MaxLevels));
+                std::memset(m_CurLevels, 0, sizeof(m_CurLevels));
+                std::memset(m_MinLevels, 0xFF, sizeof(m_MinLevels));
+                std::memset(m_MaxLevels, 0, sizeof(m_MaxLevels));
             }
         }
         ImGui::EndListBox();
@@ -494,43 +491,43 @@ void LeydenJarDiagnosticTool::LeftPaneRenderingDeviceDescription()
 
     if (m_Agent.IsDeviceOpened())
     {
-        const LeydenJarAgent::LeydenJarDeviceInfo* deviceInfo = m_Agent.GetDeviceInfo();
+        const LeydenJarAgent::LeydenJarDeviceInfo* pDeviceInfo = m_Agent.GetDeviceInfo();
 
         LeftPaneDrawLeydenJarInfos();
 
-        if (deviceInfo->via_version_major != 0 || deviceInfo->via_version_minor != 0)
+        if (pDeviceInfo->viaVersionMajor != 0 || pDeviceInfo->viaVersionMinor != 0)
         {
             ImGui::SeparatorText("VIA Infos");
-            ImGui::Text("Protocol Version: %d.%d", deviceInfo->via_version_major, deviceInfo->via_version_minor);
+            ImGui::Text("Protocol Version: %d.%d", pDeviceInfo->viaVersionMajor, pDeviceInfo->viaVersionMinor);
         }
 
-        if (deviceInfo->vial_version_0 != 0 || deviceInfo->vial_version_1 != 0 || deviceInfo->vial_version_2 != 0 || deviceInfo->vial_version_3 != 0)
+        if (pDeviceInfo->vialVersion0 != 0 || pDeviceInfo->vialVersion1 != 0 || pDeviceInfo->vialVersion2 != 0 || pDeviceInfo->vialVersion3 != 0)
         {
             ImGui::SeparatorText("VIAL Infos");
-            ImGui::Text("Protocol Version: %d.%d.%d.%d", deviceInfo->vial_version_0, deviceInfo->vial_version_1, deviceInfo->vial_version_2, deviceInfo->vial_version_3);
+            ImGui::Text("Protocol Version: %d.%d.%d.%d", pDeviceInfo->vialVersion0, pDeviceInfo->vialVersion1, pDeviceInfo->vialVersion2, pDeviceInfo->vialVersion3);
             ImGui::Text("Keyboard UID: 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x",
-                deviceInfo->vial_uid[0], deviceInfo->vial_uid[1], deviceInfo->vial_uid[2], deviceInfo->vial_uid[3],
-                deviceInfo->vial_uid[4], deviceInfo->vial_uid[5], deviceInfo->vial_uid[6], deviceInfo->vial_uid[7]);
+                pDeviceInfo->vialUid[0], pDeviceInfo->vialUid[1], pDeviceInfo->vialUid[2], pDeviceInfo->vialUid[3],
+                pDeviceInfo->vialUid[4], pDeviceInfo->vialUid[5], pDeviceInfo->vialUid[6], pDeviceInfo->vialUid[7]);
             ImGui::SetItemTooltip("0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x", 
-                                  deviceInfo->vial_uid[0], deviceInfo->vial_uid[1], deviceInfo->vial_uid[2], deviceInfo->vial_uid[3],
-                                  deviceInfo->vial_uid[4], deviceInfo->vial_uid[5], deviceInfo->vial_uid[6], deviceInfo->vial_uid[7]);
-            ImGui::Text("Keyboard definition size: %d", deviceInfo->vial_keyboard_definition_size);
+                                  pDeviceInfo->vialUid[0], pDeviceInfo->vialUid[1], pDeviceInfo->vialUid[2], pDeviceInfo->vialUid[3],
+                                  pDeviceInfo->vialUid[4], pDeviceInfo->vialUid[5], pDeviceInfo->vialUid[6], pDeviceInfo->vialUid[7]);
+            ImGui::Text("Keyboard definition size: %d", pDeviceInfo->vialKeyboardDefinitionSize);
 
-            if (m_VialUncompressedKeyboardDefinitionSize == 0 && deviceInfo->vial_keyboard_definition_size > 0)
-                DecodeVialKeyboardDefinition(deviceInfo->vial_keyboard_definition_data, deviceInfo->vial_keyboard_definition_size);
+            if (m_VialUncompressedKeyboardDefinitionSize == 0 && pDeviceInfo->vialKeyboardDefinitionSize > 0)
+                DecodeVialKeyboardDefinition(pDeviceInfo->vialKeyboardDefinitionData, pDeviceInfo->vialKeyboardDefinitionSize);
         }
 
         ImGui::SeparatorText("HID Infos");   
 
-        ImGui::Text("Path: %s", deviceInfo->pHidDeviceInfo->path);
-        ImGui::SetItemTooltip("%s", deviceInfo->pHidDeviceInfo->path);
-        ImGui::Text("Vendor: 0x%04x", deviceInfo->pHidDeviceInfo->vendor_id);
-        ImGui::Text("Product: 0x%04x", deviceInfo->pHidDeviceInfo->product_id);
-        ImGui::Text("Serial Number: %S", deviceInfo->pHidDeviceInfo->serial_number);
-        ImGui::Text("Release Number: 0x%04x", deviceInfo->pHidDeviceInfo->release_number);
-        ImGui::Text("Usage Page: 0x%04x", deviceInfo->pHidDeviceInfo->usage_page);
-        ImGui::Text("Usage: 0x%04x", deviceInfo->pHidDeviceInfo->usage);
-        ImGui::Text("Manufacturer String: %S", deviceInfo->pHidDeviceInfo->manufacturer_string);
+        ImGui::Text("Path: %s", pDeviceInfo->pHidDeviceInfo->path);
+        ImGui::SetItemTooltip("%s", pDeviceInfo->pHidDeviceInfo->path);
+        ImGui::Text("Vendor: 0x%04x", pDeviceInfo->pHidDeviceInfo->vendor_id);
+        ImGui::Text("Product: 0x%04x", pDeviceInfo->pHidDeviceInfo->product_id);
+        ImGui::Text("Serial Number: %S", pDeviceInfo->pHidDeviceInfo->serial_number);
+        ImGui::Text("Release Number: 0x%04x", pDeviceInfo->pHidDeviceInfo->release_number);
+        ImGui::Text("Usage Page: 0x%04x", pDeviceInfo->pHidDeviceInfo->usage_page);
+        ImGui::Text("Usage: 0x%04x", pDeviceInfo->pHidDeviceInfo->usage);
+        ImGui::Text("Manufacturer String: %S", pDeviceInfo->pHidDeviceInfo->manufacturer_string);
 
         LeftPaneDrawViaLayoutOptions();
     }
@@ -593,8 +590,8 @@ void LeydenJarDiagnosticTool::RightPaneRenderingKeyPresses()
         {
             if (m_LogicalKeyboardStateRequestSent)
             {
-                const LeydenJarAgent::LeydenJarDeviceInfo* deviceInfo = m_Agent.GetDeviceInfo();
-                for (int row = 0; row < deviceInfo->nbLogicalRows; row++)
+                const LeydenJarAgent::LeydenJarDeviceInfo* pDeviceInfo = m_Agent.GetDeviceInfo();
+                for (int row = 0; row < pDeviceInfo->nbLogicalRows; row++)
                     m_LogicKeyboardState[row] = m_Agent.GetLogicalKeyboardState(row);
             }
             m_Agent.RequestLogicalScan();
@@ -609,7 +606,7 @@ void LeydenJarDiagnosticTool::RightPaneRenderingKeyPresses()
         {
             if (m_PhysicalKeyboardStateRequestSent)
             {
-                const LeydenJarAgent::LeydenJarDeviceInfo* deviceInfo = m_Agent.GetDeviceInfo();
+                const LeydenJarAgent::LeydenJarDeviceInfo* pDeviceInfo = m_Agent.GetDeviceInfo();
             
                 m_Agent.GetPhysicalKeyboardState(m_PhysicalKeyboardState);
             }
@@ -636,38 +633,38 @@ void LeydenJarDiagnosticTool::RightPaneRenderingSignalLevels()
     {
         if (m_KeyboardLevelsRequestSent)
         {
-            const LeydenJarAgent::LeydenJarDeviceInfo* deviceInfo = m_Agent.GetDeviceInfo();
+            const LeydenJarAgent::LeydenJarDeviceInfo* pDeviceInfo = m_Agent.GetDeviceInfo();
             
             m_CurLevelIdx++;
 
             int idx = m_CurLevelIdx % 3;
 
-            for (int col = 0; col < deviceInfo->nbPhysicalCols; col++)
+            for (int col = 0; col < pDeviceInfo->nbPhysicalCols; col++)
             {
                 m_Agent.GetColLevels(col, m_CurLevels[idx][col]);
             }
 
-            for (int col = 0; col < deviceInfo->nbPhysicalCols; col++)
+            for (int col = 0; col < pDeviceInfo->nbPhysicalCols; col++)
             {
                 if (m_CurLevelIdx >= 2)
                 {
                     int idxPrev1 = (m_CurLevelIdx - 1) % 3;
                     int idxPrev2 = (m_CurLevelIdx - 2) % 3;
 
-                    for (int row = 0; row < deviceInfo->nbPhysicalRows; row++)
+                    for (int row = 0; row < pDeviceInfo->nbPhysicalRows; row++)
                     {
-                        int binIdx = deviceInfo->binningMap[col][row];
+                        int binIdx = pDeviceInfo->binningMap[col][row];
 
-                        if (m_CurLevels[idx][col][row] < deviceInfo->dacThreshold[binIdx] &&
-                            m_CurLevels[idxPrev1][col][row] < deviceInfo->dacThreshold[binIdx] &&
-                            m_CurLevels[idxPrev2][col][row] < deviceInfo->dacThreshold[binIdx])
+                        if (m_CurLevels[idx][col][row] < pDeviceInfo->dacThreshold[binIdx] &&
+                            m_CurLevels[idxPrev1][col][row] < pDeviceInfo->dacThreshold[binIdx] &&
+                            m_CurLevels[idxPrev2][col][row] < pDeviceInfo->dacThreshold[binIdx])
                         {
                             m_MinLevels[col][row] = std::min(m_MinLevels[col][row], medianLevelVal(m_CurLevels[idx][col][row], m_CurLevels[idxPrev1][col][row], m_CurLevels[idxPrev2][col][row]));
                         }
 
-                        if (m_CurLevels[idx][col][row] >= deviceInfo->dacThreshold[binIdx] &&
-                            m_CurLevels[idxPrev1][col][row] >= deviceInfo->dacThreshold[binIdx] &&
-                            m_CurLevels[idxPrev2][col][row] >= deviceInfo->dacThreshold[binIdx])
+                        if (m_CurLevels[idx][col][row] >= pDeviceInfo->dacThreshold[binIdx] &&
+                            m_CurLevels[idxPrev1][col][row] >= pDeviceInfo->dacThreshold[binIdx] &&
+                            m_CurLevels[idxPrev2][col][row] >= pDeviceInfo->dacThreshold[binIdx])
                         {
                             m_MaxLevels[col][row] = std::max(m_MaxLevels[col][row], medianLevelVal(m_CurLevels[idx][col][row], m_CurLevels[idxPrev1][col][row], m_CurLevels[idxPrev2][col][row]));
                         }
@@ -690,35 +687,35 @@ void LeydenJarDiagnosticTool::RightPaneRenderingSignalLevels()
 
 void LeydenJarDiagnosticTool::RightPaneDrawPhysicalLayout(bool drawLevels)
 {
-    ImDrawList* drawList = ImGui::GetWindowDrawList();
+    ImDrawList* pDrawList = ImGui::GetWindowDrawList();
     ImVec2 pos = ImGui::GetCursorScreenPos();
 
     ImVec2 rowConnectorDrawPos = ImVec2(pos.x + 1.5f * 40.f, pos.y + 2.f * 40.f + (1.5f * 40.f) / 2.f);
 
-    const LeydenJarAgent::LeydenJarDeviceInfo* deviceInfo = m_Agent.GetDeviceInfo();
+    const LeydenJarAgent::LeydenJarDeviceInfo* pDeviceInfo = m_Agent.GetDeviceInfo();
 
     int maxCol;
     int maxRow;
 
     if (m_RightPaneViewType == RightPaneViewPhysicalMatrix)
     {
-        maxCol = deviceInfo->nbPhysicalCols;
-        maxRow = deviceInfo->nbPhysicalRows;
+        maxCol = pDeviceInfo->nbPhysicalCols;
+        maxRow = pDeviceInfo->nbPhysicalRows;
     }
     else
     {
-        maxCol = deviceInfo->nbLogicalCols;
-        maxRow = deviceInfo->nbLogicalRows;
+        maxCol = pDeviceInfo->nbLogicalCols;
+        maxRow = pDeviceInfo->nbLogicalRows;
     }
 
     for (int row = 0; row < maxRow; row++)
     {
         char rowNumberString[3];
         sprintf(rowNumberString, "R%d", row);
-        drawList->AddText(NULL, 0.0f, ImVec2(rowConnectorDrawPos.x - 35.f, rowConnectorDrawPos.y - 6.f), ImGui::GetColorU32(ImGuiCol_Text), rowNumberString, rowNumberString + strlen(rowNumberString), 0.0f, NULL);
+        pDrawList->AddText(NULL, 0.0f, ImVec2(rowConnectorDrawPos.x - 35.f, rowConnectorDrawPos.y - 6.f), ImGui::GetColorU32(ImGuiCol_Text), rowNumberString, rowNumberString + strlen(rowNumberString), 0.0f, NULL);
 
-        drawList->AddCircleFilled(rowConnectorDrawPos, 10.f, IM_COL32(45, 45, 45, 255));
-        drawList->AddCircle(rowConnectorDrawPos, 10.f, IM_COL32(255, 255, 0, 255), 0, 8.f);
+        pDrawList->AddCircleFilled(rowConnectorDrawPos, 10.f, IM_COL32(45, 45, 45, 255));
+        pDrawList->AddCircle(rowConnectorDrawPos, 10.f, IM_COL32(255, 255, 0, 255), 0, 8.f);
         rowConnectorDrawPos.y += 1.55f * 40.f;
     }
 
@@ -741,10 +738,10 @@ void LeydenJarDiagnosticTool::RightPaneDrawPhysicalLayout(bool drawLevels)
         char colNumberString[4];
         sprintf(colNumberString, "C%d", col);
         size_t lenString = strlen(colNumberString);
-        drawList->AddText(NULL, 0.0f, ImVec2(colConnectorDrawPos.x - float(6 * (lenString - 1)), colConnectorDrawPos.y - 35.f), ImGui::GetColorU32(ImGuiCol_Text), colNumberString, colNumberString + strlen(colNumberString), 0.0f, NULL);
+        pDrawList->AddText(NULL, 0.0f, ImVec2(colConnectorDrawPos.x - float(6 * (lenString - 1)), colConnectorDrawPos.y - 35.f), ImGui::GetColorU32(ImGuiCol_Text), colNumberString, colNumberString + strlen(colNumberString), 0.0f, NULL);
 
-        drawList->AddCircleFilled(colConnectorDrawPos, 10.f, IM_COL32(45, 45, 45, 255));
-        drawList->AddCircle(colConnectorDrawPos, 10.f, IM_COL32(255, 255, 0, 255), 0, 8.f);
+        pDrawList->AddCircleFilled(colConnectorDrawPos, 10.f, IM_COL32(45, 45, 45, 255));
+        pDrawList->AddCircle(colConnectorDrawPos, 10.f, IM_COL32(255, 255, 0, 255), 0, 8.f);
         colConnectorDrawPos.x += 1.35f * 40.f;
 
         ImVec2 keyDrawPos = ImVec2(pos.x + keyDrawPosX, pos.y + keyDrawPosY);
@@ -761,8 +758,8 @@ void LeydenJarDiagnosticTool::RightPaneDrawPhysicalLayout(bool drawLevels)
             }
             else
             {
-                matrixCol = deviceInfo->matrixToControllerCols[col];
-                matrixRow = deviceInfo->matrixToControllerRows[row];
+                matrixCol = pDeviceInfo->matrixToControllerCols[col];
+                matrixRow = pDeviceInfo->matrixToControllerRows[row];
             }
 
             if (!drawLevels)
@@ -774,22 +771,22 @@ void LeydenJarDiagnosticTool::RightPaneDrawPhysicalLayout(bool drawLevels)
                 else
                     colKey = gbColUnpressed;
 
-                DrawConvexKey(drawList, keyDrawPos, 1.30f, 1.5f, 0.f, 0.f, 40.f, colKey, outlineCol);
+                DrawConvexKey(pDrawList, keyDrawPos, 1.30f, 1.5f, 0.f, 0.f, 40.f, colKey, outlineCol);
             }
             else
             {
                 ImU32 colKey;
 
-                int binIdx = deviceInfo->binningMap[matrixCol][matrixRow];
+                int binIdx = pDeviceInfo->binningMap[matrixCol][matrixRow];
 
                 if (m_KeyboardLevelsAcquired && 
-                    ((deviceInfo->switchTechnology == SwitchTechnologyModelF && m_CurLevels[idx][matrixCol][matrixRow] >= deviceInfo->dacThreshold[binIdx]) ||
-                     (deviceInfo->switchTechnology == SwitchTechnologyBeamSpring && m_CurLevels[idx][matrixCol][matrixRow] < deviceInfo->dacThreshold[binIdx])))
+                    ((pDeviceInfo->switchTechnology == SwitchTechnologyModelF && m_CurLevels[idx][matrixCol][matrixRow] >= pDeviceInfo->dacThreshold[binIdx]) ||
+                     (pDeviceInfo->switchTechnology == SwitchTechnologyBeamSpring && m_CurLevels[idx][matrixCol][matrixRow] < pDeviceInfo->dacThreshold[binIdx])))
                     colKey = gbColPressed;
                 else
                     colKey = gbColUnpressed;
 
-                DrawConvexKey(drawList, keyDrawPos, 1.30f, 1.5f, 0.f, 0.f, 40.f, colKey, outlineCol);
+                DrawConvexKey(pDrawList, keyDrawPos, 1.30f, 1.5f, 0.f, 0.f, 40.f, colKey, outlineCol);
 
                 if (m_KeyboardLevelsAcquired == true)
                 {
@@ -797,20 +794,20 @@ void LeydenJarDiagnosticTool::RightPaneDrawPhysicalLayout(bool drawLevels)
                     if (m_MaxLevels[matrixCol][matrixRow] != 0)
                     {
                         sprintf(levelString, "%d", m_MaxLevels[matrixCol][matrixRow]);
-                        drawList->AddText(NULL, 0.0f, ImVec2(keyDrawPos.x + 8.f, keyDrawPos.y + 5.f), ImGui::GetColorU32(ImGuiCol_Text), levelString, levelString + strlen(levelString), 0.0f, NULL);
+                        pDrawList->AddText(NULL, 0.0f, ImVec2(keyDrawPos.x + 8.f, keyDrawPos.y + 5.f), ImGui::GetColorU32(ImGuiCol_Text), levelString, levelString + strlen(levelString), 0.0f, NULL);
                     }
                     sprintf(levelString, "%d", m_CurLevels[idx][matrixCol][matrixRow]);
-                    drawList->AddText(NULL, 0.0f, ImVec2(keyDrawPos.x + 8.f, keyDrawPos.y + 22.f), ImGui::GetColorU32(ImGuiCol_Text), levelString, levelString + strlen(levelString), 0.0f, NULL);
+                    pDrawList->AddText(NULL, 0.0f, ImVec2(keyDrawPos.x + 8.f, keyDrawPos.y + 22.f), ImGui::GetColorU32(ImGuiCol_Text), levelString, levelString + strlen(levelString), 0.0f, NULL);
                     if (m_MinLevels[matrixCol][matrixRow] != 0xFFFF)
                     {
                         sprintf(levelString, "%d", m_MinLevels[matrixCol][matrixRow]);
-                        drawList->AddText(NULL, 0.0f, ImVec2(keyDrawPos.x + 8.f, keyDrawPos.y + 40.f), ImGui::GetColorU32(ImGuiCol_Text), levelString, levelString + strlen(levelString), 0.0f, NULL);
+                        pDrawList->AddText(NULL, 0.0f, ImVec2(keyDrawPos.x + 8.f, keyDrawPos.y + 40.f), ImGui::GetColorU32(ImGuiCol_Text), levelString, levelString + strlen(levelString), 0.0f, NULL);
                     }
 
-                    if (deviceInfo->binningMap[matrixCol][matrixRow] != 255)
+                    if (pDeviceInfo->binningMap[matrixCol][matrixRow] != 255)
                     {
-                        sprintf(levelString, "%d", deviceInfo->binningMap[matrixCol][matrixRow]);
-                        drawList->AddText(NULL, 0.0f, ImVec2(keyDrawPos.x + 36.f, keyDrawPos.y + 40.f), binCol, levelString, levelString + strlen(levelString), 0.0f, NULL);
+                        sprintf(levelString, "%d", pDeviceInfo->binningMap[matrixCol][matrixRow]);
+                        pDrawList->AddText(NULL, 0.0f, ImVec2(keyDrawPos.x + 36.f, keyDrawPos.y + 40.f), binCol, levelString, levelString + strlen(levelString), 0.0f, NULL);
                     }
                 }
             }
@@ -824,7 +821,7 @@ void LeydenJarDiagnosticTool::RightPaneDrawPhysicalLayout(bool drawLevels)
 
 void LeydenJarDiagnosticTool::RightPaneDrawKeyboardLayout(bool drawLevels)
 {
-    const LeydenJarAgent::LeydenJarDeviceInfo* deviceInfo = m_Agent.GetDeviceInfo();
+    const LeydenJarAgent::LeydenJarDeviceInfo* pDeviceInfo = m_Agent.GetDeviceInfo();
 
     ImDrawList* drawList = ImGui::GetWindowDrawList();
     ImVec2 pos = ImGui::GetCursorScreenPos();
@@ -861,14 +858,14 @@ void LeydenJarDiagnosticTool::RightPaneDrawKeyboardLayout(bool drawLevels)
                 {
                     ImU32 colKey;
 
-                    int matrixCol = deviceInfo->matrixToControllerCols[m_Keys[row][col].col];
-                    int matrixRow = deviceInfo->matrixToControllerRows[m_Keys[row][col].row];
+                    int matrixCol = pDeviceInfo->matrixToControllerCols[m_Keys[row][col].col];
+                    int matrixRow = pDeviceInfo->matrixToControllerRows[m_Keys[row][col].row];
 
-                    int binIdx = deviceInfo->binningMap[matrixCol][matrixRow];
+                    int binIdx = pDeviceInfo->binningMap[matrixCol][matrixRow];
 
                     if (m_KeyboardLevelsAcquired &&
-                        ((deviceInfo->switchTechnology == SwitchTechnologyModelF && m_CurLevels[idx][matrixCol][matrixRow] >= deviceInfo->dacThreshold[binIdx]) ||
-                         (deviceInfo->switchTechnology == SwitchTechnologyBeamSpring && m_CurLevels[idx][matrixCol][matrixRow] < deviceInfo->dacThreshold[binIdx])))
+                        ((pDeviceInfo->switchTechnology == SwitchTechnologyModelF && m_CurLevels[idx][matrixCol][matrixRow] >= pDeviceInfo->dacThreshold[binIdx]) ||
+                         (pDeviceInfo->switchTechnology == SwitchTechnologyBeamSpring && m_CurLevels[idx][matrixCol][matrixRow] < pDeviceInfo->dacThreshold[binIdx])))
                         colKey = gbColPressed;
                     else
                         colKey = gbColUnpressed;
@@ -898,9 +895,9 @@ void LeydenJarDiagnosticTool::RightPaneDrawKeyboardLayout(bool drawLevels)
                             drawList->AddText(NULL, 0.0f, ImVec2(keyDrawPos.x + 8.f, keyDrawPos.y + 31.f), ImGui::GetColorU32(ImGuiCol_Text), levelString, levelString + strlen(levelString), 0.0f, NULL);
                         }
 
-                        if (deviceInfo->binningMap[matrixCol][matrixRow] != 255)
+                        if (pDeviceInfo->binningMap[matrixCol][matrixRow] != 255)
                         {
-                            sprintf(levelString, "%d", deviceInfo->binningMap[matrixCol][matrixRow]);
+                            sprintf(levelString, "%d", pDeviceInfo->binningMap[matrixCol][matrixRow]);
                             drawList->AddText(NULL, 0.0f, ImVec2(keyDrawPos.x + 36.f, keyDrawPos.y + 31.f), binCol, levelString, levelString + strlen(levelString), 0.0f, NULL);
                         }
                     }
