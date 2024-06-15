@@ -1,4 +1,4 @@
 #!/bin/sh
 mkdir build
 cd build
-cmake .. -G "Unix Makefile"
+cmake .. -G "Unix Makefiles"
