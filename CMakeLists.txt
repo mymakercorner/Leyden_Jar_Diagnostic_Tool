@@ -14,8 +14,10 @@ set(JSONCPP_WITH_POST_BUILD_UNITTEST OFF CACHE BOOL "Automatically run unit-test
 
 # This removes the console for Windows platform
 if(WIN32)
-  set(CMAKE_WIN32_EXECUTABLE ON)
+    set(CMAKE_WIN32_EXECUTABLE ON)
 endif()
+
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 add_subdirectory(external/hidapi)
 add_subdirectory(external/jsoncpp)
@@ -55,6 +57,12 @@ target_include_directories(Leyden_Jar_Diagnostic_Tool PRIVATE external/minlzma)
 # Adding JSONCPP include path as it's CmakeLists file does not look to do that for us
 target_include_directories(Leyden_Jar_Diagnostic_Tool PRIVATE  external/jsoncpp/include)
 
+# Adding SDL include path as it's CmakeLists file does not look to do that for us
+target_include_directories(Leyden_Jar_Diagnostic_Tool PRIVATE external/hidapi/hidapi)
+
+# Adding hidapi include path as i$ user found it's CmakeLists file does not look to do that for us on Linux platform
+target_include_directories(Leyden_Jar_Diagnostic_Tool PRIVATE external/SDL/include)
+
 # If SDL2 is used, SDL2Main library is required for Windows platforms
 if(TARGET SDL2::SDL2main)
     target_link_libraries(Leyden_Jar_Diagnostic_Tool PRIVATE SDL2::SDL2main)
@@ -63,8 +71,16 @@ endif()
 # Link with SDL2 library
 target_link_libraries(Leyden_Jar_Diagnostic_Tool PRIVATE SDL2::SDL2)
 
-# Link with hidapi, jsoncpp_lib and minlzlib
-target_link_libraries(Leyden_Jar_Diagnostic_Tool PRIVATE hidapi jsoncpp_lib minlzlib)
+# Link with hidapi
+# i$ user found that library name was different on Linux and Windows platform
+if(WIN32)
+    target_link_libraries(Leyden_Jar_Diagnostic_Tool PRIVATE hidapi)
+else()
+    target_link_libraries(Leyden_Jar_Diagnostic_Tool PRIVATE hidapi-hidraw)
+endif()
+
+# Link with jsoncpp_lib and minlzlib
+target_link_libraries(Leyden_Jar_Diagnostic_Tool PRIVATE jsoncpp_static minlzlib)
 
 # Link with OpenGL libraies because used by SDLMain and ImGui for Windows/Linux/Mac
 target_link_libraries(Leyden_Jar_Diagnostic_Tool PRIVATE ${OPENGL_LIBRARIES})
