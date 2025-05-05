@@ -73,8 +73,8 @@ public:
 		uint8_t					vialUid[8];
 		uint32_t				vialKeyboardDefinitionSize;
 		uint8_t					vialKeyboardDefinitionData[8192];
-		uint16_t				dacThreshold[4];
-		uint16_t				dacRefLevel[4];
+		uint16_t				dacThreshold[16];
+		uint16_t				dacRefLevel[16];
 		uint8_t					binningMap[18][8];
 	};
 
