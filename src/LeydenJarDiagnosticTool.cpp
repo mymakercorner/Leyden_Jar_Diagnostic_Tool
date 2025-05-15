@@ -9,7 +9,6 @@
 
 #include "LeydenJarDiagnosticTool.h"
 #include "LeydenJarImGuiHelpers.h"
-#include "imgui.h"
 #include "json/json.h"
 
 // Minlzma library is in pure C99 code.
@@ -685,6 +684,43 @@ void LeydenJarDiagnosticTool::RightPaneRenderingSignalLevels()
         RightPaneDrawPhysicalLayout(true);
 }
 
+ImU32 LeydenJarDiagnosticTool::GetKeyColorFromLevel(const LeydenJarAgent::LeydenJarDeviceInfo* pDeviceInfo, int idx, int matrixCol, int matrixRow)
+{
+    ImU32 gbColUnpressed = IM_COL32(45, 45, 45, 255);
+    ImU32 gbColPressed = IM_COL32(45, 45, 255, 255);
+    ImU32 gbColPressedLight = IM_COL32(45, 45, 255, 64);
+
+    ImU32 colKey = gbColUnpressed;
+
+    int binIdx = pDeviceInfo->binningMap[matrixCol][matrixRow];
+
+    if (m_KeyboardLevelsAcquired)
+    {
+        if (pDeviceInfo->switchTechnology == SwitchTechnologyModelF)
+        {
+            if (m_CurLevels[idx][matrixCol][matrixRow] >= pDeviceInfo->dacThreshold[binIdx])
+            {
+                if ((m_CurLevels[idx][matrixCol][matrixRow] - pDeviceInfo->dacThreshold[binIdx]) <= 3)
+                    colKey = gbColPressedLight;
+                else
+                    colKey = gbColPressed;
+            }
+        }
+        else if (pDeviceInfo->switchTechnology == SwitchTechnologyBeamSpring)
+        {
+            if (m_CurLevels[idx][matrixCol][matrixRow] <= pDeviceInfo->dacThreshold[binIdx])
+            {
+                if ((pDeviceInfo->dacThreshold[binIdx] - m_CurLevels[idx][matrixCol][matrixRow]) <= 3)
+                    colKey = gbColPressedLight;
+                else
+                    colKey = gbColPressed;
+            }
+        }
+    }
+
+    return colKey;
+}
+
 void LeydenJarDiagnosticTool::RightPaneDrawPhysicalLayout(bool drawLevels)
 {
     ImDrawList* pDrawList = ImGui::GetWindowDrawList();
@@ -725,11 +761,11 @@ void LeydenJarDiagnosticTool::RightPaneDrawPhysicalLayout(bool drawLevels)
     float keyDrawPosY = 2.f * 40.f;
     float keyDrawIncX = 1.35f * 40.f;
     float keyDrawIncY = 1.55f * 40.f;
-
-    ImU32 gbColUnpressed = IM_COL32(45, 45, 45, 255);
-    ImU32 gbColPressed = IM_COL32(45, 45, 255, 255);
-    ImU32 outlineCol = IM_COL32(200, 200, 200, 255);
-    ImU32 binCol = IM_COL32(128, 255, 128, 255);
+    
+    ImU32 gbColUnpressed    = IM_COL32(45, 45, 45, 255);
+    ImU32 gbColPressed      = IM_COL32(45, 45, 255, 255);
+    ImU32 outlineCol        = IM_COL32(200, 200, 200, 255);
+    ImU32 binCol            = IM_COL32(128, 255, 128, 255);
 
     int idx = m_CurLevelIdx % 3;
     
@@ -775,16 +811,7 @@ void LeydenJarDiagnosticTool::RightPaneDrawPhysicalLayout(bool drawLevels)
             }
             else
             {
-                ImU32 colKey;
-
-                int binIdx = pDeviceInfo->binningMap[matrixCol][matrixRow];
-
-                if (m_KeyboardLevelsAcquired && 
-                    ((pDeviceInfo->switchTechnology == SwitchTechnologyModelF && m_CurLevels[idx][matrixCol][matrixRow] >= pDeviceInfo->dacThreshold[binIdx]) ||
-                     (pDeviceInfo->switchTechnology == SwitchTechnologyBeamSpring && m_CurLevels[idx][matrixCol][matrixRow] < pDeviceInfo->dacThreshold[binIdx])))
-                    colKey = gbColPressed;
-                else
-                    colKey = gbColUnpressed;
+                ImU32 colKey = GetKeyColorFromLevel(pDeviceInfo, idx, matrixCol, matrixRow);
 
                 DrawConvexKey(pDrawList, keyDrawPos, 1.30f, 1.5f, 0.f, 0.f, 40.f, colKey, outlineCol);
 
@@ -856,19 +883,10 @@ void LeydenJarDiagnosticTool::RightPaneDrawKeyboardLayout(bool drawLevels)
             {
                 if (m_Keys[row][col].groupNum == -1 || m_Keys[row][col].groupIdx == m_LayoutOptions[m_Keys[row][col].groupNum].selectionIndex)
                 {
-                    ImU32 colKey;
-
                     int matrixCol = pDeviceInfo->matrixToControllerCols[m_Keys[row][col].col];
                     int matrixRow = pDeviceInfo->matrixToControllerRows[m_Keys[row][col].row];
 
-                    int binIdx = pDeviceInfo->binningMap[matrixCol][matrixRow];
-
-                    if (m_KeyboardLevelsAcquired &&
-                        ((pDeviceInfo->switchTechnology == SwitchTechnologyModelF && m_CurLevels[idx][matrixCol][matrixRow] >= pDeviceInfo->dacThreshold[binIdx]) ||
-                         (pDeviceInfo->switchTechnology == SwitchTechnologyBeamSpring && m_CurLevels[idx][matrixCol][matrixRow] < pDeviceInfo->dacThreshold[binIdx])))
-                        colKey = gbColPressed;
-                    else
-                        colKey = gbColUnpressed;
+                    ImU32 colKey = GetKeyColorFromLevel(pDeviceInfo, idx, matrixCol, matrixRow);
 
                     DrawKey(drawList, pos,
                         m_Keys[row][col].w, m_Keys[row][col].w2, m_Keys[row][col].h, m_Keys[row][col].h2,

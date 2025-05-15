@@ -5,6 +5,7 @@
 
 #include <vector>
 #include "LeydenJarAgent.h"
+#include "imgui.h"
 
 // This class handles:
 //   - communication with the daemon in class LeydenJarAgent.
@@ -104,9 +105,11 @@ private:
 	void RightPaneRenderingSignalLevels();
 	void RightPaneRenderingKeyPresses();
 
+	ImU32 GetKeyColorFromLevel(const LeydenJarAgent::LeydenJarDeviceInfo* pDeviceInfo, int idx, int matrixCol, int matrixRow);
+
 	void RightPaneDrawKeyboardLayout(bool drawLevels);
 	void RightPaneDrawPhysicalLayout(bool drawLevels);
-
+	
 	void RefreshDeviceList();
 	void DecodeVialKeyboardDefinition(const uint8_t* compressedVialData, uint32_t compressedVialSize);
 
