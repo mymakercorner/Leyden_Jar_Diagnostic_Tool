@@ -688,7 +688,7 @@ ImU32 LeydenJarDiagnosticTool::GetKeyColorFromLevel(const LeydenJarAgent::Leyden
 {
     ImU32 gbColUnpressed = IM_COL32(45, 45, 45, 255);
     ImU32 gbColPressed = IM_COL32(45, 45, 255, 255);
-    ImU32 gbColPressedLight = IM_COL32(45, 45, 255, 64);
+    ImU32 gbColPressedLight = IM_COL32(128, 128, 255, 255);
 
     ImU32 colKey = gbColUnpressed;
 
