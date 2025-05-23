@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: MIT
 
 #include <vector>
+#include <string>
 #include "LeydenJarAgent.h"
 #include "imgui.h"
 
