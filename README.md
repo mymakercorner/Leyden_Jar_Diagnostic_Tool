@@ -54,12 +54,38 @@ This project is provided with the very permissive MIT license.
 
 ## Compatibility
 
-For the moment the tool has been built and tested only on Windows platforms.  
-But the project itself is cross-platform friendly and should be easily adapted to other OSes like Linux and MacOSX.
+The tool is developped on Windows so it is kwown to build and run nicely on this  platform.
+
+Thanks to **idollar** and later **ToriningenGames** users some adaptations have been made so that the tool compiles and run on Linux platforn as well.
+
+The project itself is cross-platform friendly and should be easily adapted to other OSes like MacOSX.
+
+**NOTE:**
+
+Under Linux the tool must be run with root privileges in order to work.
 
 ## Build
 
 CMake utility is used for generating the build files, the CMakeLists.txt file checks that you have at least version 3.21 installed.
+
+### About Git submodules 
+
+This projet uses Git submodules.  
+If you use a desktop GUI for managing Git repositories (like Git Extensions for example) chances are that the tool takes care cloning the submodules when cloning the main project repository.
+If you are a Git command line user (either on Windows or on Linux) you must ensure that the submodules are cloned as well before starting the build process.
+
+#### When cloning the main repository
+
+Call the following command to clone the main project repository and also its Git submodules:
+
+> git clone --recurse-submodules https://github.com/mymakercorner/Leyden_Jar_Diagnostic_Tool.git
+
+#### When the main repository is already cloned
+
+From the project base directory call the following commands:
+
+> git submodule init  
+> git submodule update
 
 ### Windows 
 
