@@ -134,7 +134,7 @@ private:
 	bool			m_PhysicalKeyboardStateRequestSent;
 	bool			m_KeyboardLevelsRequestSent;
 	bool			m_KeyboardLevelsAcquired;
-	uint32_t		m_LogicKeyboardState[8];
+	uint32_t		m_LogicKeyboardState[16];
 	uint8_t         m_PhysicalKeyboardState[18];
 	int             m_CurLevelIdx;
 	uint16_t		m_CurLevels[3][18][8];

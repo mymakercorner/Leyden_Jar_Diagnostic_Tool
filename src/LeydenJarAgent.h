@@ -138,7 +138,7 @@ private:
 	std::thread				m_Thread;
 
 	LeydenJarDeviceInfo		m_DeviceInfo;
-	uint32_t				m_LogicKeyboardState[8];
+	uint32_t				m_LogicKeyboardState[16];
 	uint8_t					m_PhysicalKeyboardState[18];
 	uint16_t                m_Levels[18][8];
 };
