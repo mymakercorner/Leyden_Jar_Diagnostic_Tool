@@ -5,6 +5,22 @@
 
 #include "LeydenJarAgent.h"
 
+bool LeydenJarAgent::LeydenJarDeviceInfo::IsProtocolVersionOlder(uint8_t major, uint8_t mid, uint16_t minor)
+{
+    if (protocolVerMajor < major)
+        return true;
+    if (protocolVerMajor > major)
+        return false;
+    if (protocolVerMid < mid)
+        return true;
+    if (protocolVerMid > mid)
+        return false;
+    if (protocolVerMinor < minor)
+        return true;
+    else
+        return false;
+}
+
 LeydenJarAgent::LeydenJarAgent()
 	: m_ReqType(LeydenJarReqNone)
     , m_ReqDeviceIndex(-1)
@@ -91,8 +107,9 @@ void LeydenJarAgent::ThreadLoop()
                     break;
 
                 memset(m_DeviceInfo.binningMap, 0, sizeof(m_DeviceInfo.binningMap));
+                m_DeviceInfo.isKeyboardLeft = true;
                 
-                if (m_DeviceInfo.protocolVerMajor == 0 && m_DeviceInfo.protocolVerMid == 9 && m_DeviceInfo.protocolVerMinor == 1)
+                if (!m_DeviceInfo.IsProtocolVersionOlder(0,9,1))
                 {
                     for (int i = 0; i < m_DeviceInfo.nbBins; i++)
                     {
@@ -107,6 +124,13 @@ void LeydenJarAgent::ThreadLoop()
                     for (int i = 0; i < m_DeviceInfo.nbPhysicalCols; i++)
                     {
                         isSuccess = m_Protocol.GetColumnBinMap(i, m_DeviceInfo.binningMap[i]);
+                        if (isSuccess == false)
+                            break;
+                    }
+
+                    if (!m_DeviceInfo.IsProtocolVersionOlder(1, 0, 0))
+                    {
+                        isSuccess = m_Protocol.GetIsKeyboardLeft(m_DeviceInfo.isKeyboardLeft);
                         if (isSuccess == false)
                             break;
                     }

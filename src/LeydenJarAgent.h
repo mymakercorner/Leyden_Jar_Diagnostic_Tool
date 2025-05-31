@@ -76,6 +76,9 @@ public:
 		uint16_t				dacThreshold[16];
 		uint16_t				dacRefLevel[16];
 		uint8_t					binningMap[18][8];
+		bool                    isKeyboardLeft;
+
+		bool IsProtocolVersionOlder(uint8_t major, uint8_t mid, uint16_t minor);
 	};
 
 public:

@@ -44,11 +44,11 @@ public:
 	bool GetProtocolVersion(uint8_t& major, uint8_t& mid, uint16_t& minor);
 	bool GetDetails(uint8_t& nbLogicalRows, uint8_t& nbLogicalCols, uint8_t& nbPhysicalRows, uint8_t& nbPhysicalCols, uint8_t& switchTechnology, uint8_t& nbBins);
 	bool GetMatrixMapping(uint8_t& matrixToControllerType, uint8_t* matrixToControllerRows, uint8_t* matrixToControllerCols, uint8_t nbPhysicalRows, uint8_t nbPhysicalCols);
+	bool GetIsKeyboardLeft(bool& isKeyboardLeft);
 	
 	bool GetVialInfos(uint8_t& version0, uint8_t& version1, uint8_t& version2, uint8_t& version3, uint8_t* pUid);
 	bool GetVialKeyboardDefinitionSize(uint32_t& definitionSize);
 	bool GetVialKeyboardDefinitionData(uint32_t definitionSize, uint8_t* pKeyboardDefinitionData);
-	
 
 	bool GetViaProtocolVersion(uint8_t& major, uint8_t& minor);
 

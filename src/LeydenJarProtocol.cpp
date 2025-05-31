@@ -28,7 +28,8 @@ enum LeydenJarCommandId {
 	LeydenJarCommandIdPhysicalMatrixVals,
 	LeydenJarCommandIdMatrixMapping,
 	LeydenJarCommandIdDacRefLevel,
-	LeydenJarCommandIdBinMap
+	LeydenJarCommandIdBinMap,
+	LeydenJarCommandIdIsKeyboardLeft
 };
 
 enum VialKeyboardValueId {
@@ -458,6 +459,22 @@ bool LeydenJarProtocol::GetMatrixMapping(uint8_t& matrixToControllerType, uint8_
 	matrixToControllerType = *(m_pRcvPayloadPtr + 0);
 	memcpy(matrixToControllerCols, m_pRcvPayloadPtr + 1, nbPhysicalCols);
 	memcpy(matrixToControllerRows, m_pRcvPayloadPtr + 1 + nbPhysicalCols, nbPhysicalRows);
+
+	return true;
+}
+
+bool LeydenJarProtocol::GetIsKeyboardLeft(bool& isKeyboardLeft)
+{
+	FillLeydenJarSendPacketHeader(c_GetKeyboardValueId, LeydenJarCommandIdIsKeyboardLeft);
+
+	if (HidSendCommand() == false)
+		return false;
+	if (*m_pRcvPayloadPtr == 1)
+		isKeyboardLeft = true;
+	else if (*m_pRcvPayloadPtr == 0)
+		isKeyboardLeft = false;
+	else
+		return false;
 
 	return true;
 }

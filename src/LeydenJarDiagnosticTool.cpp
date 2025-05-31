@@ -732,6 +732,7 @@ void LeydenJarDiagnosticTool::RightPaneDrawPhysicalLayout(bool drawLevels)
 
     int maxCol;
     int maxRow;
+    int startRow = 0;
 
     if (m_RightPaneViewType == RightPaneViewPhysicalMatrix)
     {
@@ -742,11 +743,18 @@ void LeydenJarDiagnosticTool::RightPaneDrawPhysicalLayout(bool drawLevels)
     {
         maxCol = pDeviceInfo->nbLogicalCols;
         maxRow = pDeviceInfo->nbLogicalRows;
+        if (!pDeviceInfo->isKeyboardLeft)
+            startRow = 8;
+        else
+        {
+            if (maxRow > 8)
+                maxRow /= 2;
+        }
     }
 
-    for (int row = 0; row < maxRow; row++)
+    for (int row = startRow; row < maxRow; row++)
     {
-        char rowNumberString[3];
+        char rowNumberString[4];
         sprintf(rowNumberString, "R%d", row);
         pDrawList->AddText(NULL, 0.0f, ImVec2(rowConnectorDrawPos.x - 35.f, rowConnectorDrawPos.y - 6.f), ImGui::GetColorU32(ImGuiCol_Text), rowNumberString, rowNumberString + strlen(rowNumberString), 0.0f, NULL);
 
@@ -782,7 +790,7 @@ void LeydenJarDiagnosticTool::RightPaneDrawPhysicalLayout(bool drawLevels)
 
         ImVec2 keyDrawPos = ImVec2(pos.x + keyDrawPosX, pos.y + keyDrawPosY);
 
-        for (int row = 0; row < maxRow; row++)
+        for (int row = startRow; row < maxRow; row++)
         {
             int matrixCol;
             int matrixRow;
@@ -795,17 +803,24 @@ void LeydenJarDiagnosticTool::RightPaneDrawPhysicalLayout(bool drawLevels)
             else
             {
                 matrixCol = pDeviceInfo->matrixToControllerCols[col];
-                matrixRow = pDeviceInfo->matrixToControllerRows[row];
+                if (row < 8)
+                    matrixRow = pDeviceInfo->matrixToControllerRows[row];
+                else
+                    matrixRow = pDeviceInfo->matrixToControllerRows[row - 8];
             }
 
             if (!drawLevels)
             {
                 ImU32 colKey;
 
-                if (m_PhysicalKeyboardState[matrixCol] & (1 << matrixRow))
-                    colKey = gbColPressed;
-                else
-                    colKey = gbColUnpressed;
+                colKey = gbColUnpressed;
+                if ((pDeviceInfo->isKeyboardLeft && row < 8) ||
+                    (!pDeviceInfo->isKeyboardLeft && row >= 8) ||
+                    (m_RightPaneViewType == RightPaneViewPhysicalMatrix))
+                {
+                    if (m_PhysicalKeyboardState[matrixCol] & (1 << matrixRow))
+                        colKey = gbColPressed;
+                }
 
                 DrawConvexKey(pDrawList, keyDrawPos, 1.30f, 1.5f, 0.f, 0.f, 40.f, colKey, outlineCol);
             }
@@ -884,16 +899,29 @@ void LeydenJarDiagnosticTool::RightPaneDrawKeyboardLayout(bool drawLevels)
                 if (m_Keys[row][col].groupNum == -1 || m_Keys[row][col].groupIdx == m_LayoutOptions[m_Keys[row][col].groupNum].selectionIndex)
                 {
                     int matrixCol = pDeviceInfo->matrixToControllerCols[m_Keys[row][col].col];
-                    int matrixRow = pDeviceInfo->matrixToControllerRows[m_Keys[row][col].row];
+                    int keyRow = m_Keys[row][col].row;
+                    if (keyRow >= 8)
+                        keyRow -= 8;
+                    int matrixRow = pDeviceInfo->matrixToControllerRows[keyRow];
 
-                    ImU32 colKey = GetKeyColorFromLevel(pDeviceInfo, idx, matrixCol, matrixRow);
+                    ImU32 colKey;
+                    bool deadKey = false;
+
+                    if ((pDeviceInfo->isKeyboardLeft && m_Keys[row][col].row >= 8) ||
+                        (!pDeviceInfo->isKeyboardLeft && m_Keys[row][col].row < 8))
+                    {
+                        deadKey = true;
+                        colKey = gbColUnpressed;
+                    }
+                    else
+                        colKey = GetKeyColorFromLevel(pDeviceInfo, idx, matrixCol, matrixRow);
 
                     DrawKey(drawList, pos,
                         m_Keys[row][col].w, m_Keys[row][col].w2, m_Keys[row][col].h, m_Keys[row][col].h2,
                         m_Keys[row][col].x, m_Keys[row][col].x2, m_Keys[row][col].y, m_Keys[row][col].y2,
                         50.f, colKey, outlineCol);
 
-                    if (m_KeyboardLevelsAcquired == true)
+                    if (m_KeyboardLevelsAcquired == true && !deadKey)
                     {
                         ImVec2 keyDrawPos;
                         keyDrawPos.x = pos.x + (m_Keys[row][col].x + m_Keys[row][col].w / 2 - 0.5f) * 50.f;
