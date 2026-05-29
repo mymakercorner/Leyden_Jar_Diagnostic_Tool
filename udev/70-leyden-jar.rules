@@ -1,0 +1,18 @@
+# Model F Labs / Leyden Jar capacitive keyboards.
+#
+# Grants the physically-present local user hidraw access to the keyboard so the
+# Leyden Jar Diagnostic Tool can run without root. All Model F Labs boards
+# (e.g. F104, B104 Beam Spring) enumerate under the pid.codes VID 1209:4704.
+#
+# Install:
+#   sudo cp 70-leyden-jar.rules /etc/udev/rules.d/
+#   sudo udevadm control --reload-rules && sudo udevadm trigger
+# Then unplug and replug the keyboard.
+#
+# The filename must sort before 73-seat-late.rules, or TAG+="uaccess" has no
+# effect. uaccess grants access to the user at the local seat (no group setup,
+# no sudo for the GUI). For remote/SSH use instead, replace the tag with:
+#   GROUP="plugdev", MODE="0660"
+# and add your user to the plugdev group.
+
+KERNEL=="hidraw*", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="4704", TAG+="uaccess"
