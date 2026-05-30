@@ -6,13 +6,13 @@ The Leyden Jar Diagnostic Tool is an application meant to perform troubleshootin
 
 ## The Leyden Jar controller project
 
-The [Leyden Jar](https://en.wikipedia.org/wiki/Leyden_jar) is a modernized controller PCB for the Brand New Model F and Beam Spring keyboards and is pin compatible with the good old XWhatsit controller we all know. 
+The [Leyden Jar](https://en.wikipedia.org/wiki/Leyden_jar) is a modernized controller PCB for the Brand New Model F and Beam Spring keyboards and is pin compatible with the good old XWhatsit controller we all know.
 
 This is an open source project, available on GitHub at the following link [here](https://github.com/mymakercorner/Leyden_Jar).
 
 ## Inspiration
 
-Pandrew did a similar tool for the XWhatsit controller, his fundamental ideas have been applied to the Leyden Jar Diagnostic Tool with the addition of some new features and small improvements. 
+Pandrew did a similar tool for the XWhatsit controller, his fundamental ideas have been applied to the Leyden Jar Diagnostic Tool with the addition of some new features and small improvements.
 
 ## Benefits
 
@@ -21,15 +21,15 @@ Usage of this tool can benefit both firmware developers and end users.
 ### Firmware developers
 
 Writing a firmware for a new Model F or Beam Spring keyboard is a rather involved process. This tool can help inspect various states of the keyboard including reading the analogic levels of each key.
-This eases the process of tuning some firmware parameters. 
+This eases the process of tuning some firmware parameters.
 This can also help find software issues, and also can help find and understand hardware issues as well.
 
 ### End users
 
-The program allow to easily make the controller go into bootloader mode (to flash a new firmware) or to erase the EEPROM that can contain VIA keys/layers configurations.  
+The program allow to easily make the controller go into bootloader mode (to flash a new firmware) or to erase the EEPROM that can contain VIA keys/layers configurations.
 
-It is not uncommon for keys to stop working after shipping or transportation or because of a bad keycap installation.  
-If some keyboard keys don't work as intended the tool can help investigate the issue. 
+It is not uncommon for keys to stop working after shipping or transportation or because of a bad keycap installation.
+If some keyboard keys don't work as intended the tool can help investigate the issue.
 
 ## Features
 
@@ -62,15 +62,15 @@ The project itself is cross-platform friendly and should be easily adapted to ot
 
 **NOTE:**
 
-Under Linux the tool must be run with root privileges in order to work.
+Under Linux the tool needs read/write access to the keyboard's `hidraw` device node. Rather than running the whole GUI as root, install the provided udev rule so it can run as your normal user (see *Device access (udev rule)* under the Linux build section below).
 
 ## Build
 
 CMake utility is used for generating the build files, the CMakeLists.txt file checks that you have at least version 3.21 installed.
 
-### About Git submodules 
+### About Git submodules
 
-This projet uses Git submodules.  
+This projet uses Git submodules.
 If you use a desktop GUI for managing Git repositories (like Git Extensions for example) chances are that the tool takes care cloning the submodules when cloning the main project repository.
 If you are a Git command line user (either on Windows or on Linux) you must ensure that the submodules are cloned as well before starting the build process.
 
@@ -84,17 +84,57 @@ Call the following command to clone the main project repository and also its Git
 
 From the project base directory call the following commands:
 
-> git submodule init  
+> git submodule init
 > git submodule update
 
-### Windows 
+### Windows
 
-You will need to have Visual Studio 2022 installed on your computer, a community edition will work perfectly.  
-Execute GenerateBuildForVS2022.bat script, the Visual Studio solution should then be created inside the build directory. 
+You will need to have Visual Studio 2022 installed on your computer, a community edition will work perfectly.
+Execute GenerateBuildForVS2022.bat script, the Visual Studio solution should then be created inside the build directory.
 
-### Linux(untested)
+### Linux (Debian/Ubuntu/Pop!\_OS)
+
+#### Prerequisites
+
+Before generating the build files you must install the following development packages.
+On Debian/Ubuntu based distributions (including Pop!\_OS) they can be installed with:
+
+> sudo apt install build-essential cmake libudev-dev libusb-1.0-0-dev libxext-dev libgl1-mesa-dev
+
+| Package | Why it is needed |
+| --- | --- |
+| build-essential | Provides the C/C++ compiler (`gcc`/`g++`) and `make` used to compile the project. |
+| cmake | Generates the build files (version 3.21 or later is required). |
+| libudev-dev | Required by the bundled hidapi hidraw backend (`pkg_check_modules(libudev REQUIRED ...)`). |
+| libusb-1.0-0-dev | Required by the bundled hidapi libusb backend (`pkg_check_modules(libusb-1.0>=1.0.9 REQUIRED ...)`). |
+| libxext-dev | Required by the bundled SDL X11 video backend (`CheckX11` in `external/SDL/CMakeLists.txt`). |
+| libgl1-mesa-dev | Provides OpenGL headers and `libGL`, needed to link the Dear ImGui OpenGL3 backend (otherwise linking fails with `undefined reference to 'glViewport'`). |
+
+#### Generating the build
 
 Execute GenerateBuildForUnix.sh to generate build files in the build directory.
+
+#### Compiling
+
+Once the build files have been generated, compile the project from the build directory:
+
+> cd build
+> make
+
+The resulting `Leyden_Jar_Diagnostic_Tool` executable is created in the build directory.
+
+#### Device access (udev rule)
+
+So the tool can talk to the keyboard without running the whole GUI as root, install the provided udev rule. It grants the locally logged-in user access to the Leyden Jar keyboard's `hidraw` node (all Model F Labs boards enumerate under USB id `1209:4704`):
+
+> sudo cp udev/70-leyden-jar.rules /etc/udev/rules.d/
+> sudo udevadm control --reload-rules && sudo udevadm trigger
+
+Then plug in the keyboard (or unplug and replug it, if it was already connected) so the rule is applied to it. You can now run the tool as your normal user:
+
+> ./build/Leyden_Jar_Diagnostic_Tool
+
+The rule uses `TAG+="uaccess"`, which grants access to the user physically present at the machine. If you need to reach the device from a remote (e.g. SSH) session instead, see the comments inside `udev/70-leyden-jar.rules`.
 
 ### MacOSX(untested)
 
@@ -106,7 +146,7 @@ This project uses several other software packages as GIT sub modules.
 
 ### SDL
 
-A famous cross-platform windowing API under the ZLIB license: https://github.com/libsdl-org/SDL  
+A famous cross-platform windowing API under the ZLIB license: https://github.com/libsdl-org/SDL
 
 ### minlzma
 

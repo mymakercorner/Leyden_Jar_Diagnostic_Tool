@@ -410,7 +410,7 @@ void LeydenJarDiagnosticTool::LeftPaneRenderingDeviceDescription()
             const bool is_selected = (m_SelectedDeviceIndex == n) || (m_SelectedDeviceIndex == -1);
             bool selectionChanged = ImGui::Selectable(m_DeviceListNames[n], is_selected) || (m_SelectedDeviceIndex == -1);
 
-            ImGui::SetItemTooltip(m_DeviceListNames[n]);
+            ImGui::SetItemTooltip("%s", m_DeviceListNames[n]);
 
             if (selectionChanged)
             {
