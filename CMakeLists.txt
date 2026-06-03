@@ -19,6 +19,10 @@ endif()
 
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
+# hidapi 0.14.0 still declares cmake_minimum_required(VERSION 3.1.3); CMake 4.x
+# removed support for policy versions below 3.5. Raise the policy floor so the
+# hidapi submodule keeps configuring (no-op on CMake < 3.31, which lacks this var).
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 add_subdirectory(external/hidapi)
 add_subdirectory(external/jsoncpp)
 add_subdirectory(external/minlzma/minlzlib)
@@ -73,7 +77,8 @@ target_link_libraries(Leyden_Jar_Diagnostic_Tool PRIVATE SDL2::SDL2)
 
 # Link with hidapi
 # i$ user found that library name was different on Linux and Windows platform
-if(WIN32)
+# (macOS exposes the same "hidapi" target name as Windows)
+if(WIN32 OR APPLE)
     target_link_libraries(Leyden_Jar_Diagnostic_Tool PRIVATE hidapi)
 else()
     target_link_libraries(Leyden_Jar_Diagnostic_Tool PRIVATE hidapi-hidraw)
