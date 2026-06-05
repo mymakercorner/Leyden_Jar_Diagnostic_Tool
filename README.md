@@ -121,6 +121,8 @@ Once the build files have been generated, compile the project from the build dir
 > cd build
 > make
 
+To speed things up you can build in parallel with `make -jN` (for example `make -j$(getconf _NPROCESSORS_ONLN)` to use all CPU cores), as long as the machine has enough RAM — each parallel compile job can use several hundred MB.
+
 The resulting `Leyden_Jar_Diagnostic_Tool` executable is created in the build directory.
 
 #### Device access (udev rule)
@@ -144,6 +146,7 @@ You need the Xcode Command Line Tools for the compiler (`xcode-select --install`
 
 Build-tested on:
 * MacBook Pro 2.4 GHz 8-Core Intel Core i9 - macOS Sequoia 15.7.7 (24G720).
+* MacBook Pro M4 Max (Apple Silicon) - macOS Sequoia 15.6.1.
 
 ## Acknowlegments
 
